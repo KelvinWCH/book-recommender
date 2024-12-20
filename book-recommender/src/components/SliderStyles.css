@@ -1,0 +1,28 @@
+.horizontal-slider {
+    height: 100%;
+    width: 100%;
+    background: #000000;
+    border-radius: 5px;
+    position: relative;
+    
+}
+
+.example-thumb {
+    height:1rem;
+    cursor: grab;
+    position: relative;
+
+}
+
+.example-track {
+    background: #F0F0F2;
+    border-color: rgb(209 213 219);
+    border-radius: 5px;
+    border: solid;
+    border-width: 1px;
+    height: 1.5rem;
+}
+
+.example-mark {
+    background: transparent;
+}
