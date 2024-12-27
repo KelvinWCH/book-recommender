@@ -1,15 +1,15 @@
-function HistoryContainer() {
+function HistoryContainer({bookTitle, authorName, date}) {
     return (
         <>
-            <div className="flex flex-col w-full h-full bg-blue-200 rounded-md p-4">
-                <p className="font-semibold text-lg" > Book Title Here Here</p>
-                <p className="font-semibold text-md" > Author Name</p>
-                <p className="text-sm" > Dec 25 2024</p>
-
-                <div className="flex-shrink-0 w-3/4 aspect-[2/3] bg-black rounded-md">
-                    <img className="text-white w-full h-full rounded-md" />
+                <div className="flex flex-col w-full bg-white rounded-md p-4 overflow-clip m-1 border-2 border-black">
+                    <p className="font-semibold text-lg" > {bookTitle} </p>
+                    
+                    <p className="font-semibold text-md" > {authorName} </p>
+                    <div className="flex flex-row justify-between">
+                    <p className="text-sm" > {date}</p>
+                    <img src = "./delete.svg" className="h-[1rem] w-[1rem]"/>
+                    </div>
                 </div>
-            </div>
         </>
 
     );

@@ -3,23 +3,18 @@ import { googleProvider } from "../firebase.js";
 import { auth } from "../firebase.js";
 import { signInWithPopup, signOut, onAuthStateChanged } from "firebase/auth";
 import { dataBase } from "../firebase.js";
-import { getDocs, collection } from "firebase/firestore";
+import { getDocs, collection, addDoc, deleteDoc,serverTimestamp } from "firebase/firestore";
+
 
 import HistoryContainer from "./HistoryContainer.js";
 
 function Login() {
 
-    const valueReference = collection(dataBase, "test");
-    const [currentUser, setCurrentUser] = useState(null);
 
-    useEffect(() => {
-        async function getData() {
-            const data = await getDocs(valueReference);
-            const filteredData = data.docs.map((doc) => ({ ...doc.data(), id: doc.id, }))
-            console.log(filteredData);
-        }
-        getData();
-    })
+    const [currentUser, setCurrentUser] = useState(null);
+    const [userData, setUserData] = useState(null); // State to store fetched data
+    const [collectionName, setCollectionName] = useState("test");
+    const [valueReference, setValueReference] = useState(null);
 
     async function googleLogin() {
         console.log(auth?.currentUser?.email);
@@ -35,21 +30,42 @@ function Login() {
     }
 
     useEffect(function componentMountEffect() {
-        // Define a regular function to handle auth changes
         function handleAuthChange(user) {
             setCurrentUser(user);
+            setCollectionName(user.email);
+            setValueReference(collection(dataBase, collectionName));
         }
 
-        // onAuthStateChanged returns a function for unsubscribing
+    
         const unsubscribe = onAuthStateChanged(auth, handleAuthChange);
 
-        // Return a cleanup function that unsubscribes when the component unmounts
         return function cleanup() {
             unsubscribe();
         };
     }, []);
 
 
+    useEffect(() => {
+        if (currentUser) {
+            getInformation()
+                .then(data => {
+                    setUserData(data.docs.map((doc) => ({...doc.data()}))); // Store fetched data in state
+                    console.log(userData);
+                })
+                .catch(error => {
+                    console.error("Error fetching information:", error);
+                });
+        } else {
+            setUserData(null);
+        }
+    }, [currentUser]);
+
+
+
+    async function getInformation() {
+        const data = await getDocs(valueReference);
+        return data;
+    }
 
     if (currentUser) {
         return loggedIn();
@@ -57,6 +73,28 @@ function Login() {
         return loggedOut();
     }
 
+
+    async function addData(){
+        try {
+            const docRef = await addDoc(valueReference, {
+                name: "Tokyo",
+                country: "Japan",
+                date: serverTimestamp(),
+            });
+            console.log("Document written with ID: ", docRef.id);
+        } catch (e) {
+            console.error("Error adding document: ", e);
+        }
+    }
+
+    async function deleteDoc(){
+        try {
+            await deleteDoc(valueReference, "Tokyo");
+            console.log("Document successfully deleted!");
+        } catch (e) {
+            console.error("Error removing document: ", e);
+        }
+    }
 
     function loggedOut() {
         return (
@@ -80,17 +118,22 @@ function Login() {
                     <p className="cursor-pointer" onClick={logOut}>
                         Log Out
                     </p>
-                    <HistoryContainer />
-                    <HistoryContainer />
-                    <HistoryContainer />
-                    <HistoryContainer />
-                    <HistoryContainer />
-                    <HistoryContainer />
-                    <HistoryContainer />
-                    <HistoryContainer />
-                    <HistoryContainer />
-                    <HistoryContainer />
+                    <div onClick = { addData }> hey </div>
+                    <div onClick={deleteDoc}> bye</div>
+                    <div className="w-full bg-gray-200" style={{ height: "2000px" }} >
+                        <HistoryContainer />
+                        <HistoryContainer />
+                        <HistoryContainer />
+                        <HistoryContainer />
+                        <HistoryContainer />
+                        <HistoryContainer />
+                        <HistoryContainer />
+                        <HistoryContainer />
+                        <HistoryContainer />
+                        <HistoryContainer />
+                    </div>
                 </div>
+
 
             </>
         )
