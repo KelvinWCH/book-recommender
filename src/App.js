@@ -194,6 +194,7 @@ function App() {
         <div className="w-full flex flex-row justify-evenly">
           <p className="text-white font-bold"> Created by <a className="text-red-500 underline cursor-pointer"
               href="https://www.linkedin.com/in/kelvin-chung-536720245/"
+              rel="noopener noreferrer" //vulnerability 
               target = "_blank"
             >
                Kelvin Chung
@@ -201,6 +202,7 @@ function App() {
           </p>
           <a className="text-red-500 underline cursor-pointer font-bold"
               href="https://github.com/KelvinWCH/book-recommender"
+              rel="noopener noreferrer" //vulnerability
               target = "_blank"
             >
                GitHub

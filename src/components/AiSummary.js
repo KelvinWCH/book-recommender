@@ -3,7 +3,7 @@ function AiSummary({summaryText}) {
         <>
             <div className="flex flex-col gap-1">
                 <div className="flex gap-1">
-                    <img src="./lightning_black.svg"></img>
+                    <img src="./lightning_black.svg" alt = "Lightning"></img>
                     <p className="font-semibold"> AI Summary</p>
                 </div>
                 <p className="font-semibold"> 
