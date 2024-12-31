@@ -18,3 +18,8 @@ code {
 .center-flex {
   @apply flex items-center justify-center;
 }
+
+::selection{
+  background-color: #800000;
+  color: white;
+}

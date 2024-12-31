@@ -27,6 +27,8 @@ function App() {
   const [pages, setPages] = useState();
   const [bookGenre, setBookGenre] = useState("");
 
+  const [triggerData, setTriggerData] = useState(0);
+
   function handleClick() {
     console.log("Prompt:", prompt);
     console.log("Genre:", genre);
@@ -40,6 +42,9 @@ function App() {
     window.open(link);
   }
 
+  function addData() {
+    setTriggerData((prev) => prev + 1);
+  }
 
   async function generateRecommendation() {
     console.log("pressed");
@@ -59,7 +64,9 @@ function App() {
           Authorization: `Bearer ${process.env.REACT_APP_OPENAI_API_KEY}`
         }
       }
+
     );
+
     const result = payload.data.choices[0].message.content;
     console.log(result);
     const jsonResult = JSON.parse(result);
@@ -69,28 +76,58 @@ function App() {
     setAuthor(jsonResult.author);
     setLink(jsonResult.source);
     grabBookCover(jsonResult.title);
-   
-    console.log(`${process.env.REACT_APP_PROMPT}`);
+    addData();
   }
 
 
-  async function grabBookCover(title){
+  async function grabBookCover(title) {
     const result = await axios.get(`https://www.googleapis.com/books/v1/volumes?q=${title}`)
+    try {
+      console.log(result.data.items[0].volumeInfo.infoLink);
+      setLink(result.data.items[0].volumeInfo.infoLink);
+      setBookCoverSource(result.data.items[0].volumeInfo.imageLinks.thumbnail);
+      setPages(result.data.items[0].volumeInfo.pageCount);
+      setBookGenre(result.data.items[0].volumeInfo.categories[0]);
+    } catch (e) {
+      console.log(e);
+    }
 
-    console.log(result.data.items[0].volumeInfo.infoLink);
-    setLink(result.data.items[0].volumeInfo.infoLink);
-    setBookCoverSource(result.data.items[0].volumeInfo.imageLinks.thumbnail);
-    setPages(result.data.items[0].volumeInfo.pageCount);
-    setBookGenre(result.data.items[0].volumeInfo.categories[0]);
   }
 
   return (
-    <div className='bg-gray-950 w-screen h-screen flex flex-col items-center justify-center'>
+    <div className='bg-black w-screen h-screen flex flex-col items-center justify-center'>
       <div className='w-2/3 h-4/5 flex flex-col gap-1 flex-grow-0 '>
         <div className='bg-transparent w-full h-3/4 flex flex-row gap-1'>
 
           <div className='bg-gray-200 n-200 h-full w-1/4 rounded-md center-flex flex-col'>
-            <Login />
+            <Login
+              prompt={prompt}
+              genre={genre}
+              bookLength={bookLength}
+              complexity={complexity}
+              sliderValue={sliderValue}
+              summary={summary}
+              title={title}
+              author={author}
+              link={link}
+              bookCoverSource={bookCoverSource}
+              pages={pages}
+              bookGenre={bookGenre}
+
+              setPrompt={setPrompt}
+              setGenre={setGenre}
+              setBookLength={setBookLength}
+              setComplexity={setComplexity}
+              setSliderValue={setSliderValue}
+              setSummary={setSummary}
+              setTitle={setTitle}
+              setAuthor={setAuthor}
+              setLink={setLink}
+              setBookCoverSource={setBookCoverSource}
+              setPages={setPages}
+              setBookGenre={setBookGenre}
+              triggerData={triggerData}
+            />
           </div>
 
 
@@ -143,7 +180,7 @@ function App() {
           </div>
 
           <div className='bg-gray-200 h-full w-1/4 rounded-md center-flex flex-col'>
-            <BookOutput title={title} author={author} pictureSource={bookCoverSource} bookGenre={bookGenre} pages = {pages}/>
+            <BookOutput title={title} author={author} pictureSource={bookCoverSource} bookGenre={bookGenre} pages={pages} />
             <span className='w-full px-5 py-3'>
               <BlackButton src="./link.svg" text="Google Books" onClick={openGoodreads} />
             </span>
@@ -153,7 +190,24 @@ function App() {
         <div className='bg-gray-200 w-full h-1/5 rounded-md p-3'>
           <AiSummary summaryText={summary} />
         </div>
+
+        <div className="w-full flex flex-row justify-evenly">
+          <p className="text-white font-bold"> Created by <a className="text-red-500 underline cursor-pointer"
+              href="https://www.linkedin.com/in/kelvin-chung-536720245/"
+              target = "_blank"
+            >
+               Kelvin Chung
+            </a>
+          </p>
+          <a className="text-red-500 underline cursor-pointer font-bold"
+              href="https://github.com/KelvinWCH/book-recommender"
+              target = "_blank"
+            >
+               GitHub
+            </a>
+        </div>
       </div>
+
     </div>
   );
 }
