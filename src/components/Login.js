@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import axios from 'axios';
 import { googleProvider } from "../firebase.js";
 import { auth } from "../firebase.js";
 import { signInWithPopup, signOut, onAuthStateChanged } from "firebase/auth";
@@ -193,31 +194,55 @@ function Login({
 
     // --- Firestore: add data to user’s collection ---
     async function addData() {
-        if (!valueReference) {
-            return;
-        }
-        try {
-            const docRef = await addDoc(valueReference, {
-                prompt: prompt, // string
-                genre: genre, // string
-                bookLength: bookLength, // string
-                complexity: complexity, // string
-                sliderValue: sliderValue, // number
-                summary: summary, // string
-                title: title, // string
-                author: author, // string
-                link: link, // string
-                bookCoverSource: bookCoverSource, // string
-                pages: pages, // number
-                bookGenre: bookGenre, // string
-                date: serverTimestamp(),
+        try{
+            const whatisthisfor = await axios.post('http://localhost:5000/addData', {
+                email : collectionName,
+                prompt : prompt,
+                genre : genre,
+                bookLength : bookLength,
+                complexity : complexity,
+                sliderValue     : sliderValue,
+                summary : summary,
+                title : title,
+                author : author,
+                link : link,
+                bookCoverSource : bookCoverSource,
+                pages : pages,
+                bookGenre : bookGenre,
+                date : serverTimestamp(),
             });
             setMeow((prev) => prev + 1);
-            console.log("Document written with ID: ", docRef.id, meow);
-        } catch (e) {
-            console.error("Error adding document: ", e);
+        }
+        catch(error){
+            console.error('Error adding document: ', error);
         }
     }
+        //We don't use legacy code here
+        // if (!valueReference) {
+        //     return;
+        // }
+        // try {
+        //     const docRef = await addDoc(valueReference, {
+        //         prompt: prompt, // string
+        //         genre: genre, // string
+        //         bookLength: bookLength, // string
+        //         complexity: complexity, // string
+        //         sliderValue: sliderValue, // number
+        //         summary: summary, // string
+        //         title: title, // string
+        //         author: author, // string
+        //         link: link, // string
+        //         bookCoverSource: bookCoverSource, // string
+        //         pages: pages, // number
+        //         bookGenre: bookGenre, // string
+        //         date: serverTimestamp(),
+        //     });
+        //     setMeow((prev) => prev + 1);
+        //     console.log("Document written with ID: ", docRef.id, meow);
+        // } catch (e) {
+        //     console.error("Error adding document: ", e);
+        // }
+    
 
     // --- Logged-out View ---
     function loggedOut() {
