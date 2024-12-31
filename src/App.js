@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import './App.css';
 import Login from './components/Login.js';
 import TextArea from './components/promptInput.js';
@@ -38,6 +38,7 @@ function App() {
   }
 
 
+
   function openGoodreads() {
     window.open(link);
   }
@@ -48,26 +49,11 @@ function App() {
 
   async function generateRecommendation() {
     console.log("pressed");
+    const payload = await axios.post('/generateBook', {
+      message: `Prompt: ${prompt}, Genre: ${genre}, length ${bookLength}, complexity ${complexity}, creative: ${sliderValue}`
+    });
 
-    const payload = await axios.post(
-      "https://api.openai.com/v1/chat/completions",
-      {
-        model: "gpt-4o-mini",
-        messages: [
-          { role: "user", content: `${process.env.REACT_APP_PROMPT} Prompt: ${prompt}, Genre: ${genre}, length ${bookLength}, complexity ${complexity}, creative: ${sliderValue}` },
-        ]
-      },
-
-      {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${process.env.REACT_APP_OPENAI_API_KEY}`
-        }
-      }
-
-    );
-
-    const result = payload.data.choices[0].message.content;
+    const result = payload.data.response.content;
     console.log(result);
     const jsonResult = JSON.parse(result);
 
@@ -81,7 +67,7 @@ function App() {
 
 
   async function grabBookCover(title) {
-    const result = await axios.get(`https://www.googleapis.com/books/v1/volumes?q=${title}`)
+    const result = await axios.get(`https://www.googleapis.com/books/v1/volumes?q=${title}:keyes&key=${process.env.REACT_APP_GOOGLE_API_KEY}`);
     try {
       console.log(result.data.items[0].volumeInfo.infoLink);
       setLink(result.data.items[0].volumeInfo.infoLink);
@@ -193,20 +179,20 @@ function App() {
 
         <div className="w-full flex flex-row justify-evenly">
           <p className="text-white font-bold"> Created by <a className="text-red-500 underline cursor-pointer"
-              href="https://www.linkedin.com/in/kelvin-chung-536720245/"
-              rel="noopener noreferrer" //vulnerability 
-              target = "_blank"
-            >
-               Kelvin Chung
-            </a>
+            href="https://www.linkedin.com/in/kelvin-chung-536720245/"
+            rel="noopener noreferrer" //vulnerability 
+            target="_blank"
+          >
+            Kelvin Chung
+          </a>
           </p>
           <a className="text-red-500 underline cursor-pointer font-bold"
-              href="https://github.com/KelvinWCH/book-recommender"
-              rel="noopener noreferrer" //vulnerability
-              target = "_blank"
-            >
-               GitHub
-            </a>
+            href="https://github.com/KelvinWCH/book-recommender"
+            rel="noopener noreferrer" //vulnerability
+            target="_blank"
+          >
+            GitHub
+          </a>
         </div>
       </div>
 
