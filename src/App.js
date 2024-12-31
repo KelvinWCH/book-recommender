@@ -49,7 +49,7 @@ function App() {
 
   async function generateRecommendation() {
     console.log("pressed");
-    const payload = await axios.post('/generateBook', {
+    const payload = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/generateBook`, {
       message: `Prompt: ${prompt}, Genre: ${genre}, length ${bookLength}, complexity ${complexity}, creative: ${sliderValue}`
     });
 

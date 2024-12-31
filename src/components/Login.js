@@ -195,7 +195,7 @@ function Login({
     // --- Firestore: add data to user’s collection ---
     async function addData() {
         try{
-            const whatisthisfor = await axios.post('http://localhost:5000/addData', {
+            const whatisthisfor = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/addData`, {
                 email : collectionName,
                 prompt : prompt,
                 genre : genre,
