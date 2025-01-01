@@ -214,7 +214,7 @@ function Login({
             }, {
                 headers: {
                     Authorization: `Bearer ${token}`,
-                }
+                },  withCredentials: true
             });
             setMeow((prev) => prev + 1);
         }

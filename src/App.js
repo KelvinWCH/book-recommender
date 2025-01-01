@@ -70,7 +70,7 @@ function App() {
     }, {
       headers: {
         Authorization: `Bearer ${token}`,
-      },
+      }, withCredentials: true
     });
 
     const result = payload.data.response.content;
@@ -91,7 +91,7 @@ function App() {
     },  {
       headers: {
         Authorization: `Bearer ${token}`,
-      },
+      }, withCredentials: true
     });
     try {
       console.log(result.data.items[0].volumeInfo.infoLink);

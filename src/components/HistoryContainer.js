@@ -49,7 +49,7 @@ function HistoryContainer({
             }, {
                 headers: {
                     Authorization: `Bearer ${token}`,
-                }
+                },  withCredentials: true
             })
             setMeow((prev) => prev + 1);
         } catch (error) {
