@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import axios from 'axios';
 import { googleProvider } from "../firebase.js";
 import { auth } from "../firebase.js";
@@ -42,6 +42,7 @@ function Login({
     setPages,
     setBookGenre,
     triggerData,
+    token,
 }) {
 
 
@@ -50,7 +51,6 @@ function Login({
     const [collectionName, setCollectionName] = useState("loggedOut");
     const [valueReference, setValueReference] = useState(null);
     const [meow, setMeow] = useState(0);
-
     // --- Sign in with Google ---
     async function googleLogin() {
         console.log(auth?.currentUser?.email);
@@ -169,6 +169,7 @@ function Login({
                             setBookCoverSource={setBookCoverSource}
                             setPages={setPages}
                             setBookGenre={setBookGenre}
+                            token={token}
                         />
                     </div>
                 </>
@@ -194,70 +195,76 @@ function Login({
 
     // --- Firestore: add data to user’s collection ---
     async function addData() {
-        try{
-            const whatisthisfor = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/addData`, {
-                email : collectionName,
-                prompt : prompt,
-                genre : genre,
-                bookLength : bookLength,
-                complexity : complexity,
-                sliderValue     : sliderValue,
-                summary : summary,
-                title : title,
-                author : author,
-                link : link,
-                bookCoverSource : bookCoverSource,
-                pages : pages,
-                bookGenre : bookGenre,
-                date : serverTimestamp(),
+        try {
+            await axios.post(`${process.env.REACT_APP_BACKEND_URL}/firebase/addData`, {
+                email: collectionName,
+                prompt: prompt,
+                genre: genre,
+                bookLength: bookLength,
+                complexity: complexity,
+                sliderValue: sliderValue,
+                summary: summary,
+                title: title,
+                author: author,
+                link: link,
+                bookCoverSource: bookCoverSource,
+                pages: pages,
+                bookGenre: bookGenre,
+                date: serverTimestamp(),
+            }, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                }
             });
             setMeow((prev) => prev + 1);
         }
-        catch(error){
+        catch (error) {
             console.error('Error adding document: ', error);
         }
     }
-        //We don't use legacy code here
-        // if (!valueReference) {
-        //     return;
-        // }
-        // try {
-        //     const docRef = await addDoc(valueReference, {
-        //         prompt: prompt, // string
-        //         genre: genre, // string
-        //         bookLength: bookLength, // string
-        //         complexity: complexity, // string
-        //         sliderValue: sliderValue, // number
-        //         summary: summary, // string
-        //         title: title, // string
-        //         author: author, // string
-        //         link: link, // string
-        //         bookCoverSource: bookCoverSource, // string
-        //         pages: pages, // number
-        //         bookGenre: bookGenre, // string
-        //         date: serverTimestamp(),
-        //     });
-        //     setMeow((prev) => prev + 1);
-        //     console.log("Document written with ID: ", docRef.id, meow);
-        // } catch (e) {
-        //     console.error("Error adding document: ", e);
-        // }
-    
+    //We don't use legacy code here
+    // if (!valueReference) {
+    //     return;
+    // }
+    // try {
+    //     const docRef = await addDoc(valueReference, {
+    //         prompt: prompt, // string
+    //         genre: genre, // string
+    //         bookLength: bookLength, // string
+    //         complexity: complexity, // string
+    //         sliderValue: sliderValue, // number
+    //         summary: summary, // string
+    //         title: title, // string
+    //         author: author, // string
+    //         link: link, // string
+    //         bookCoverSource: bookCoverSource, // string
+    //         pages: pages, // number
+    //         bookGenre: bookGenre, // string
+    //         date: serverTimestamp(),
+    //     });
+    //     setMeow((prev) => prev + 1);
+    //     console.log("Document written with ID: ", docRef.id, meow);
+    // } catch (e) {
+    //     console.error("Error adding document: ", e);
+    // }
+
 
     // --- Logged-out View ---
     function loggedOut() {
         return (
             <>
-                <div
-                    className="bg-black w-3/4 h-9 center-flex flex-row gap-1 rounded-md cursor-pointer"
-                    onClick={googleLogin}
-                >
-                    <img src="./google-logo.svg" alt="Sign in with Google" />
-                    <p className="text-white font-semibold hidden lg:inline text-md">
-                        Sign in with Google
-                    </p>
-                </div>
-                <p className="text-sm">Login to save results</p>
+
+                    <div
+                        className="bg-black w-3/4 h-9 center-flex flex-row gap-1 rounded-md cursor-pointer"
+                        onClick={googleLogin}
+                    >
+                        <img src="./google-logo.svg" alt="Sign in with Google" />
+                        <p className="text-white font-semibold hidden lg:inline text-md">
+                            Sign in with Google
+                        </p>
+                    </div>
+                    <p className="text-sm">Login to save results</p>
+
             </>
         );
     }
@@ -266,20 +273,22 @@ function Login({
     function loggedIn() {
         return (
             <>
-                <div className="h-full w-full flex flex-col items-center overflow-y-auto gap-1 p-2">
-                    <p
-                        className="cursor-pointer bg-red-800 w-full text-white center-flex font-semibold rounded-md"
-                        onClick={logOut}
-                    >
-                        Log Out
-                    </p>
-                    <p className="text-sm">
-                        User: <span className="font-bold"> {collectionName} </span>
-                    </p>
-                    <div className="w-full bg-gray-200" style={{ minHeight: "300px" }}>
-                        {renderHistoryContainers()}
+   
+                    <div className="h-full w-full flex flex-col items-center overflow-y-auto gap-1 p-2">
+                        <p
+                            className="cursor-pointer bg-red-800 w-full text-white center-flex font-semibold rounded-md"
+                            onClick={logOut}
+                        >
+                            Log Out
+                        </p>
+                        <p className="text-sm">
+                            User: <span className="font-bold"> {collectionName} </span>
+                        </p>
+                        <div className="w-full bg-gray-200" style={{ minHeight: "300px" }}>
+                            {renderHistoryContainers()}
+                        </div>
                     </div>
-                </div>
+
             </>
         );
     }

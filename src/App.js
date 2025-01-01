@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useId, useContext } from "react";
+
 import './App.css';
 import Login from './components/Login.js';
 import TextArea from './components/promptInput.js';
@@ -28,6 +29,20 @@ function App() {
   const [bookGenre, setBookGenre] = useState("");
 
   const [triggerData, setTriggerData] = useState(0);
+  const [token, setToken] = useState("");
+  const [buttonText, setButtonText] = useState("Generate");
+  // const [token, setToken] = useState("");
+
+
+  useEffect(() => {
+    async function getToken() {
+      const result = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/generateJWT`, {
+        UID: useId,
+      });
+      setToken(result.data.token);
+    }
+    getToken();
+  }, []);
 
   function handleClick() {
     console.log("Prompt:", prompt);
@@ -49,36 +64,65 @@ function App() {
 
   async function generateRecommendation() {
     console.log("pressed");
+    setButtonText("Loading...");
     const payload = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/generateBook`, {
       message: `Prompt: ${prompt}, Genre: ${genre}, length ${bookLength}, complexity ${complexity}, creative: ${sliderValue}`
+    }, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     });
 
     const result = payload.data.response.content;
     console.log(result);
     const jsonResult = JSON.parse(result);
-
+    setButtonText("Generate");
     setSummary(jsonResult.summary);
     setTitle(jsonResult.title);
     setAuthor(jsonResult.author);
     setLink(jsonResult.source);
     grabBookCover(jsonResult.title);
-    addData();
   }
 
 
   async function grabBookCover(title) {
-    const result = await axios.get(`https://www.googleapis.com/books/v1/volumes?q=${title}:keyes&key=${process.env.REACT_APP_GOOGLE_API_KEY}`);
+    const result = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/grabBook/`, {
+      bookName: title
+    },  {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
     try {
       console.log(result.data.items[0].volumeInfo.infoLink);
       setLink(result.data.items[0].volumeInfo.infoLink);
       setBookCoverSource(result.data.items[0].volumeInfo.imageLinks.thumbnail);
       setPages(result.data.items[0].volumeInfo.pageCount);
       setBookGenre(result.data.items[0].volumeInfo.categories[0]);
+      addData();
     } catch (e) {
       console.log(e);
     }
-
   }
+
+
+  // Development Code for JWT token testing. 
+  // async function generateToken() {
+  //   const result = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/generateJWT`, {
+  //     UID: useId,
+  //   });
+  //   console.log(result.data.token);
+
+  //   const authenticate = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/checkToken`,
+  //     {}, //make sure data body is empty
+  //     {
+  //       headers: {
+  //         Authorization: `Bearer ${result.data.token}`,
+  //       },
+  //     }
+  //   );
+  //   console.log(authenticate.data);
+  // }
 
   return (
     <div className='bg-black w-screen h-screen flex flex-col items-center justify-center'>
@@ -113,6 +157,7 @@ function App() {
               setPages={setPages}
               setBookGenre={setBookGenre}
               triggerData={triggerData}
+              token={token}
             />
           </div>
 
@@ -161,7 +206,7 @@ function App() {
 
             <div className="flex w-full h-10 gap-1">
               <BlackButton src="./Sparkle.svg" text="Surprise me" onClick={handleClick} />
-              <BlackButton src="./lightning.svg" text="Generate" onClick={generateRecommendation} />
+              <BlackButton src="./lightning.svg" text={buttonText} onClick={generateRecommendation} />
             </div>
           </div>
 

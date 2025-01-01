@@ -1,7 +1,6 @@
 import { doc, deleteDoc } from "firebase/firestore";
-
-
-
+import axios from 'axios';
+import { useContext } from "react";
 
 
 
@@ -22,7 +21,6 @@ function HistoryContainer({
     docID,
     collectionName,
     bookCoverSource,
-    dataBase,
     setMeow,
 
 
@@ -37,22 +35,29 @@ function HistoryContainer({
     setLink,
     setBookCoverSource,
     setPages,
-    setBookGenre
+    setBookGenre,
+
+    token,
 }) {
 
-
     async function deleteDocument(docID) {
-        console.log("Deleting document:", String(docID));
+        console.log("Deleting document with ID:", docID, collectionName);
         try {
-            await deleteDoc(doc(dataBase, collectionName, String(docID)));
-            setMeow((prev) => !prev); //changes something idk, which is needed to trigger a useEffect in the parent component
-            console.log("Document successfully deleted!");
-        } catch (e) {
-            console.error("Error removing document: ", e);
+            await axios.post(`${process.env.REACT_APP_BACKEND_URL}/firebase/deleteData`, {
+                email: collectionName,
+                docID: docID,
+            }, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                }
+            })
+            setMeow((prev) => prev + 1);
+        } catch (error) {
+            console.log(error);
         }
     }
 
-    function setDetails(){
+    function setDetails() {
         setTitle(bookTitle);
         setAuthor(authorName);
         setBookGenre(bookGenre);
@@ -68,21 +73,23 @@ function HistoryContainer({
     }
 
     return (
-        <div className="flex flex-col w-full bg-white rounded-md p-4 overflow-clip m-1 border-2 border-black cursor-pointer"
-            onClick={setDetails}>
-            <p className="font-semibold text-lg">{bookTitle}</p>
-            <p className="font-semibold text-md">{authorName}</p>
-            <div className="flex flex-row justify-between">
-                <p className="text-sm">{date}</p>
-                <img
-                    src="./delete.svg"
-                    className="h-[1rem] w-[1rem] cursor-pointer"
-                    onClick={() => deleteDocument(docID)} // Pass docID explicitly
-                    alt={`Delete Icon | ${docID}`}
-                />
 
+            <div className="flex flex-col w-full bg-white rounded-md p-4 overflow-clip m-1 border-2 border-black cursor-pointer"
+                onClick={setDetails}>
+                <p className="font-semibold text-lg">{bookTitle}</p>
+                <p className="font-semibold text-md">{authorName}</p>
+                <div className="flex flex-row justify-between">
+                    <p className="text-sm">{date}</p>
+                    <img
+                        src="./delete.svg"
+                        className="h-[1rem] w-[1rem] cursor-pointer"
+                        onClick={() => deleteDocument(docID)} // Pass docID explicitly
+                        alt={`Delete Icon | ${docID}`}
+                    />
+
+                </div>
             </div>
-        </div>
+
     );
 }
 
